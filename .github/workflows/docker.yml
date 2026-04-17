@@ -33,6 +33,10 @@ jobs:
           context: ./controller
           platforms: linux/arm/v7,linux/arm64,linux/amd64
           push: true
+          labels: |
+            org.opencontainers.image.source=https://github.com/powerguardianOS/powerguardian-docker
+            org.opencontainers.image.title=PowerGuardian Docker
+            org.opencontainers.image.description=PowerGuardian Controller — UPS monitoring for Docker
           tags: |
-            ghcr.io/powerguardianos/powerguardian-controller:latest
-            ghcr.io/powerguardianos/powerguardian-controller:1.0.0
+            ghcr.io/powerguardianos/powerguardian-docker:latest
+            ghcr.io/powerguardianos/powerguardian-docker:1.0.0
