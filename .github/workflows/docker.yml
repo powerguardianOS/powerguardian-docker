@@ -35,4 +35,4 @@ jobs:
           push: true
           tags: |
             ghcr.io/powerguardianos/powerguardian-controller:latest
-            ghcr.io/powerguardianos/powerguardian-controller:${{ github.sha }}
+            ghcr.io/powerguardianos/powerguardian-controller:1.0.0
