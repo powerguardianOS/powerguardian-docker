@@ -1,6 +1,6 @@
 services:
   powerguardian:
-    image: ghcr.io/powerguardianos/powerguardian-controller:latest
+    image: ghcr.io/powerguardianos/powerguardian-docker:latest
     container_name: powerguardian
     restart: unless-stopped
     ports:
