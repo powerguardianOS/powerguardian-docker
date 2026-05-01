@@ -17,7 +17,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: powerguardianOS/powerguardian-controller
-          token: ${{ secrets.DISPATCH_TOKEN }}
+          token: ${{ secrets.CONTROLLER_TOKEN }}
           ref: ${{ github.event.client_payload.sha || 'master' }}
 
       - name: Set up QEMU
