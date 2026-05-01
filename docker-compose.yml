@@ -1,15 +1,37 @@
 services:
   powerguardian:
-    image: ghcr.io/powerguardianos/powerguardian-docker:latest
+    image: ghcr.io/powerguardianos/powerguardian-controller-docker:latest
     container_name: powerguardian
+    network_mode: host
     restart: unless-stopped
-    ports:
-      - "${PG_PORT:-8181}:${PG_PORT:-8181}"
     volumes:
-      - powerguardian-data:/data
+      - pg-data:/data
+    devices:
+      - /dev/bus/usb:/dev/bus/usb
     environment:
-      PG_ADDR: "0.0.0.0:${PG_PORT:-8181}"
+      # Optional: set to a fixed key to survive DB loss. Auto-generated on first start if not set.
+      # PG_VAULT_KEY: ""
+      PG_ADDR: "0.0.0.0:${PG_PORT:-9090}"
       PG_DB: "/data/powerguardian.db"
+      PG_WATCHTOWER_URL: "http://localhost:9000"
+      PG_WATCHTOWER_TOKEN: "${PG_WATCHTOWER_TOKEN:-pg-update-token}"
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+
+  watchtower:
+    image: containrrr/watchtower
+    container_name: powerguardian-watchtower
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_HTTP_API_TOKEN=${PG_WATCHTOWER_TOKEN:-pg-update-token}
+      - WATCHTOWER_HTTP_API_UPDATE=true
+      - WATCHTOWER_HTTP_API_PORT=9000
+      - WATCHTOWER_LABEL_ENABLE=true
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_NO_STARTUP_MESSAGE=true
 
 volumes:
-  powerguardian-data:
+  pg-data:
