@@ -1,14 +1,12 @@
-name: Build & Push Docker Image
+name: Build & Publish Docker Image
 
 on:
-  push:
-    branches: [main]
   repository_dispatch:
     types: [controller-updated]
   workflow_dispatch:
 
 jobs:
-  build:
+  docker:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -19,27 +17,32 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: powerguardianOS/powerguardian-controller
-          token: ${{ secrets.CONTROLLER_TOKEN }}
-          ref: master
+          token: ${{ secrets.DISPATCH_TOKEN }}
+          ref: ${{ github.event.client_payload.sha || 'master' }}
 
-      - uses: docker/setup-qemu-action@v3
-      - uses: docker/setup-buildx-action@v3
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
-      - uses: docker/login-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.CONTROLLER_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: docker/build-push-action@v6
+      - name: Build and push
+        uses: docker/build-push-action@v6
         with:
           context: ./controller
           platforms: linux/arm/v7,linux/arm64,linux/amd64
           push: true
-          labels: |
-            org.opencontainers.image.source=https://github.com/powerguardianOS/powerguardian-docker
-            org.opencontainers.image.title=PowerGuardian Docker
-            org.opencontainers.image.description=PowerGuardian Controller — UPS monitoring for Docker
           tags: |
-            ghcr.io/powerguardianos/powerguardian-docker:latest
-            ghcr.io/powerguardianos/powerguardian-docker:${{ github.event.client_payload.sha || github.sha }}
+            ghcr.io/powerguardianos/powerguardian-controller-docker:latest
+            ghcr.io/powerguardianos/powerguardian-controller-docker:${{ github.event.client_payload.sha || github.sha }}
+          build-args: |
+            VERSION=${{ github.event.client_payload.sha || github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
